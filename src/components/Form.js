@@ -14,6 +14,7 @@ import MyModal from "./MyModal";
 import CustomDropdown from "./CustomDropdown";
 import Breakdowns from "./Breakdowns";
 import {getCurrencyBydefault} from "../services/currency"
+import AddProviderModal from "./AddProviderModal";
  // crée un provider
  // button modal
  // name et account_id obligatoire
@@ -83,7 +84,11 @@ function Form() {
     dataCurrencyList,
     
     setDataCurrencyList,
+    loadAgainProviderList,
+   
   } = useContext(Context);
+
+
   console.log("currencyByDefault",currencyByDefault)
   console.log(image, "image from Form");
   console.log("type of image", typeof image);
@@ -204,8 +209,8 @@ function Form() {
     getDataProvidersList();
    
 
-    // console.log("inside useEffect", dataProvidersList);
-  }, []);
+   // si loadAgainProviderList change la requete est renvoyée
+  }, [loadAgainProviderList]);
   useLayoutEffect(() => {
     getAccountList();
    
@@ -373,8 +378,11 @@ function Form() {
         multiline={true}
       />
    
-
+      <View style={styles.containerProvider} >
       <Text style={styles.textStyle}>Provider: </Text>
+      <AddProviderModal />
+
+      </View>
 
       <CustomDropdown
         label={dataProvider.name === "" ? "Provider": dataProvider.name}
@@ -450,6 +458,13 @@ const styles = StyleSheet.create({
     color: "white",
     backgroundColor: "gray",
   },
+  containerProvider: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    
+  }
 });
 
 export default Form;

@@ -22,6 +22,8 @@ function ContextProvider(props) {
   const [currencyByDefault, setCurrencyByDefault] = useState("");
   // liste des monnaie récupérée de l'api
   const [dataCurrencyList, setDataCurrencyList] = useState([]);
+  // relancer la requête pour avoir la nouvelle liste des providers
+  const [loadAgainProviderList, setLoadAgainProviderList] = useState(false)
 
   // les valeurs que je veux récupérer à travers l'application
   const value = {
@@ -43,6 +45,8 @@ function ContextProvider(props) {
     setCurrencyByDefault,
     dataCurrencyList,
     setDataCurrencyList,
+    loadAgainProviderList,
+    setLoadAgainProviderList
   };
   return <Context.Provider value={value}>{props.children}</Context.Provider>;
 }

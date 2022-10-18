@@ -23,7 +23,7 @@ const MyModal = ({ source }) => {
               elevation={5}
               colorBg={"#ff0000"}
               colorText={"white"}
-              title={"Close"}
+              title={"Close  "}
               onPress={() => setModalVisible(!modalVisible)}
             />
           </View>

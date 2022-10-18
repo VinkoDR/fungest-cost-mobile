@@ -31,10 +31,14 @@ export default function Button({ title, onPress, icon, colorBg, colorText, eleva
       color: colorText,
       marginLeft: 10,
     },
+    icon: {
+      marginLeft: 10,
+    }
+
   });
   return (
     <TouchableOpacity onPress={onPress} style={styles.button} ref={propRef}>
-      <Entypo name={icon} size={28}></Entypo>
+      <Entypo name={icon} size={28} style={styles.icon}></Entypo>
       <Text style={styles.text}>{`${title}  `}</Text>
       
     </TouchableOpacity>
