@@ -12,11 +12,12 @@ import "react-native-get-random-values";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { Context } from "../contexts.js/Context";
+import { Context } from "../contexts.js/Context"; 
 import { b64toBlob } from "../utils/b64ToBlob";
 
 function Mycamera() {
-  const { image, setImage, imageInfoToSend, setImageInfoToSend } = useContext(Context);
+  const { image, setImage, imageInfoToSend, setImageInfoToSend } =
+    useContext(Context);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
   // const [image, setImage] = useState(null);
@@ -25,7 +26,7 @@ function Mycamera() {
   const cameraRef = useRef();
   const navigation = useNavigation();
 
-  console.log(image, "from on load");
+  console.log(image.slice(0,15), "from on load");
 
   //demander la permission d'utiliser la camera et l acces à la gallerie du tel
   useEffect(() => {
@@ -40,6 +41,7 @@ function Mycamera() {
   }, []);
 
   //sauvegarder l image dans le tel =>
+  //non utilisé
   const saveImage = async () => {
     if (image) {
       try {
@@ -68,14 +70,12 @@ function Mycamera() {
         console.log("is trying...");
         const data = await cameraRef.current.takePictureAsync(options);
         // console.log("data: ", Object.keys(data));
-        // console.log("base64", data.base64)
+         console.log("base64", data.base64.slice(0,15))
         // var contentType = 'image/jpg';
         // var b64Data = data.base64;
         // var blob = b64toBlob(b64Data, contentType);
-        // setImageInfoToSend(URL.createObjectURL(blob));
-
-        
-        setImage(data.uri);
+        setImageInfoToSend(data);
+        setImage("data:image/jpeg;base64," + data.base64);
       } catch (error) {
         console.log(error);
       }

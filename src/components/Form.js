@@ -5,19 +5,20 @@ import Button from "./Button";
 
 import { useForm } from "../utils/hooks";
 import axios from "axios";
-import { Buffer } from "buffer";
+
 
 import { Context } from "../contexts.js/Context";
 import MyModal from "./MyModal";
 
-
 import CustomDropdown from "./CustomDropdown";
 import Breakdowns from "./Breakdowns";
-import {getCurrencyBydefault} from "../services/currency"
+import { getCurrencyBydefault } from "../services/currency";
 import AddProviderModal from "./AddProviderModal";
- // crée un provider
- // button modal
- // name et account_id obligatoire
+
+//react-native-auth0
+// crée un provider
+// button modal
+// name et account_id obligatoire
 
 //  import { getDataProvidersList } from '../services/api'
 
@@ -63,9 +64,13 @@ import AddProviderModal from "./AddProviderModal";
 //     "total": "144"}
 
 function Form() {
+  // représente le provider que l'on va séléctionner
   const [dataProvider, setDataProvider] = useState({});
-  const [defaultValueCurrency, setDefaultValueCurrency ]= useState({})
+  // valeur de la monnaie par défault
+  const [defaultValueCurrency, setDefaultValueCurrency] = useState({});
+  // valeur de la monnaie séléctionnée
   const [currency, setCurrency] = useState({ label: "CHF", value: "CHF" });
+  // valeur stockée dans le context
   const {
     imageInfoToSend,
     setImageInfoToSend,
@@ -82,140 +87,129 @@ function Form() {
     currencyByDefault,
     setCurrencyByDefault,
     dataCurrencyList,
-    
+
     setDataCurrencyList,
     loadAgainProviderList,
-   
   } = useContext(Context);
 
-
-  console.log("currencyByDefault",currencyByDefault)
-  console.log(image, "image from Form");
+  console.log("currencyByDefault", currencyByDefault);
+  console.log(image.slice(0,15), "image from Form");
   console.log("type of image", typeof image);
-  // const datab = [
-  //   {
-  //     name: "CHF",
-  //     value: "CHF",
-  //   },
-  //   { name: "EUR", value: "EUR" },
-  // ];
-  /// récuperer la monnaie depuis le back
-  const datab = []
+
   useEffect(() => {
-   
     try {
-        const { data } = axios
-          .get(`https://fungest-test.lahode.ch/api/boot`)
-          .then((response) => {
-             console.log("currencies", response.data.currencies);
-             console.log("response.data.settings.data", response.data.settings.data)
+      const { data } = axios
+        .get(`https://fungest-test.lahode.ch/api/boot`)
+        .then((response) => {
+          console.log("currencies", response.data.currencies);
+          console.log(
+            "response.data.settings.data",
+            response.data.settings.data
+          );
 
-             const thisDataDefaultCurrency = response.data.settings.data
-             setDefaultValueCurrency(thisDataDefaultCurrency.find(element => element.key === "default_currency"))
-             setDefaultValueCurrency(prevState => {name: prevState.value})
-             
-
-           const thisdata = (response.data.currencies);
-            // var arr = ["124857202", "500255104", "78573M104"];
-            setDataCurrencyList( thisdata.reduce(function(s, a){
-                s.push({name: a});
-                return s;
-              }, []))
-              
-          
+          const thisDataDefaultCurrency = response.data.settings.data;
+          // on cherche l'objet qui contient la key = "default_currency"
+          // et on l'attribue au state de DefaultValueCurrency
+          setDefaultValueCurrency(
+            thisDataDefaultCurrency.find(
+              (element) => element.key === "default_currency"
+            )
+          );
+          // on lui rajoute la propriete name qui nous permmettra de l'afficher par name comme défini dans notre custom dropdown
+          setDefaultValueCurrency((prevState) => {
+            name: prevState.value;
           });
-      } catch (err) {
+
+          // on rajoute  la propriete name aux autre element de la liste
+          const thisdata = response.data.currencies;
+          // var arr = ["124857202", "500255104", "78573M104"];
+          setDataCurrencyList(
+            thisdata.reduce(function (s, a) {
+              s.push({ name: a });
+              return s;
+            }, [])
+          );
+        });
+    } catch (err) {
       //  Handle error
-        console.log("error from getCurrencyByDefault", err);
-      }
- 
-   return () => {
-     
-   }
- }, [])
-  /////////////////// api accounts call////////////////////////////////////////////////////////////////
+      console.log("error from getCurrencyByDefault", err);
+    }
 
-  //  useEffect(() => {
-  //   try {
-  //     const { data } = axios
-  //       .get(`https://fungest-test.lahode.ch/api/accounts`)
-  //       .then((response) => {
-  //         return setAccountsList(response.data.data);
-  //       })
-  //       .then(() => {
-  //         let accountDefault = accountsList.find(
-  //           (defaultAccount) => defaultAccount.id == dataProvider.account_id
-  //         );
-  //         console.log(accountDefault, "accountDefault");
-  //         setAccount(accountDefault);
-
-  //         console.log(account.name, "account.name");
-  //         setIsLoading(false);
-  //       });
-  //   } catch (err) {
-  //     // Handle error
-  //     console.log("error from getAccountList", err);
-  //   }
-  //   // console.log("inside useEffect accountsList", accountsList);
-  // }, [dataProvider.account_id]);
-  ///////////////////////////////////////////////////////////////////////////////
+    return () => {};
+  }, []);
 
   ///////////////// api providers call/////////////////////////////////////////////////////////////////
-
+  // on fait appel à l'api pour récupérer la liste des providers diponible
   const getDataProvidersList = () => {
     try {
       const { data } = axios
         .get(`https://fungest-test.lahode.ch/api/providers`)
         .then((response) => {
-          // console.log("provider1", response.data.data);
-
+          // on attribue la réponse de la requête au state DataProvidersList
           setDataProvidersList(response.data.data);
         });
     } catch (err) {
       // Handle error
-      // console.log("error from getDataprovidersList", err);
+      console.log("error from getDataprovidersList", err);
     }
   };
-    /////////////////// api accounts call////////////////////////////////////////////////////////////////
+  /////////////////// api accounts call////////////////////////////////////////////////////////////////
+  // on fait appel à l'api pour récupérer la liste des accounts disponible
+  const getAccountList = async () => {
+    try {
+      let dataAccounts = null;
+      let accountDefault = null;
 
-   const getAccountList = () => {
-      try {
-        const { data } = axios
-          .get(`https://fungest-test.lahode.ch/api/accounts`)
-          .then((response) => {
-            return setAccountsList(response.data.data);
-          })
-          .then(() => {
-            let accountDefault = accountsList.find(
-              (defaultAccount) => defaultAccount.id == dataProvider.account_id
-            );
-            console.log(accountDefault, "accountDefault");
-            setAccount(accountDefault);
-            
-            
-          }).then(() => {
-            console.log(account.name, "account.name");
-            console.log("account from getAccountList", account)
-            setIsLoading(false);
-          });
-      } catch (err) {
-        // Handle error
-        console.log("error from getAccountList", err);
-      }
-      // console.log("inside useEffect accountsList", accountsList);
-    };
+      dataAccounts = await axios.get(
+        `https://fungest-test.lahode.ch/api/accounts`
+      );
+      console.debug("[defaultAccounts]", dataAccounts);
+      if (!dataAccounts) return; //check if the response is not undefined or nulll or whatever
+      setAccountsList(dataAccounts.data.data);
+      console.debug("[dataprovider]", dataProvider);
+      if (!dataProvider) return; //check if the data provider is not empty
+      accountDefault = accountsList.find(
+        (da) => da.id === dataProvider.account_id
+      );
+      console.debug("[accountDefault]", accountDefault);
+      if (!accountDefault) return; //check if we found an account default
+      setAccount(accountDefault);
+      setIsLoading(false);
+
+      // const { data } = axios
+      //   .get(`https://fungest-test.lahode.ch/api/accounts`)
+      //   .then((response) => {
+      //     return setAccountsList(response.data.data);
+      //   })
+      //   .then(() => {
+      //     // on cherche l'account par défaut du provider pour definir quelle est notre account
+      //     let accountDefault = accountsList.find(
+      //       (defaultAccount) => defaultAccount.id == dataProvider.account_id
+      //     );
+      //     console.log(accountDefault, "accountDefault");
+      //     setAccount(accountDefault);
+      //   })
+      //   .then(() => {
+      //     console.log(account.name, "account.name");
+      //     console.log("account from getAccountList", account);
+      //     setIsLoading(false);
+      //   });
+    } catch (e) {
+      // Handle error
+      console.log(
+        "[GetAccountList] an error has occured when fetching account list",
+        e
+      );
+    }
+    // console.log("inside useEffect accountsList", accountsList);
+  };
 
   useEffect(() => {
     getDataProvidersList();
-   
-
-   // si loadAgainProviderList change la requete est renvoyée
+    // si loadAgainProviderList change la requete est renvoyée
   }, [loadAgainProviderList]);
   useLayoutEffect(() => {
     getAccountList();
-   
-
-    // console.log("inside useEffect", dataProvidersList);
   }, [dataProvider]);
 
   //////////// useForm custom hook///////////////////////////////////////////////////////////////////////
@@ -230,15 +224,24 @@ function Form() {
     total: 0,
     // uuid: "",
   });
-//////////////////// BLOB //////////////////////////////////////
-  // const base64 = image.base64;
-  // const buffer = Buffer.from(base64, "base64");
+  //////////////////// BLOB //////////////////////////////////////
+  // console.log("type of imageInfoToSend",typeof imageInfoToSend.base64)
+  console.log("image", Object.keys(imageInfoToSend));
+  console.log("image", typeof imageInfoToSend);
 
-  // const blob = new Blob([buffer], { type: "[content-type]" });
-  // setImageInfoToSend(blob);
-  // console.log("imageInfoToSend ",imageInfoToSend)
-  // var bodyFormData = new FormData();
-  // bodyFormData.append("upload", imageInfoToSend);
+  const base64 = imageInfoToSend.base64;
+
+  //const test = base64.blob()
+  // console.log("image info to send= ",imageInfoToSend.base64)
+  // const buffer = Buffer.from(base64, "base64");
+  // // console.log("buffer", buffer)
+  // const test = await base64.arrayBuffer()
+  // const blob = new Blob([await base64.arrayBuffer()], { type: "image/jpeg" });
+  // //  console.log("BLOB = ",blob)
+  // //  setImageInfoToSend(blob);
+  // //  console.log("imageInfoToSend ",imageInfoToSend)
+  // let bodyFormData = new FormData();
+  // bodyFormData.append("upload", test);
   // console.log("bodyFormData", bodyFormData);
 
   //  .then((res) => res.blob())
@@ -273,32 +276,43 @@ function Form() {
       ticket: true,
       breakdowns: breakdowns,
     });
+    // valeur qui nous permettra de savoir si la somme totale des breakdowns correspond à la valeur totale du cost
     let totalBreakdown = 0;
-
+    // on boucle les breakdowns en ajoutant leur somme au totalBreakdown
     for (let i = 0; i < breakdowns.length; i++) {
       let thisAmount = parseFloat(breakdowns[i].amount);
       totalBreakdown += thisAmount;
     }
 
-    if (values.currency === "EUR" && values.original_amount == "") {
+    // différentes alerts sont lancé si l'utilisateur ne rempli pas les conditions obligatoires
+
+    //on alerte si la monnaie n'est pas chf et si on a pas attribué de valeur à original_amount
+    if (values.currency !== "CHF" && values.original_amount == "") {
       alert(
-        "You have changed your currency to Euro, please fill the orginal amount field"
+        "You have changed your currency, please fill the orginal amount field"
       );
+      //on alerte si on a pas attribué de valeur totale au cost
     } else if (values.total === 0) {
       alert("Please enter an amount for the total field");
+      // on alerte si la somme des breakdowns  no correspond pas à la valeur passé au total
     } else if (values.total != totalBreakdown && breakdowns.length > 0) {
       console.log("values.total", values.total);
       alert(
         `The sum of the breakdowns is not equal to the total, the total is ${values.total} and the sums of the breakdowns is equal to ${totalBreakdown}`
       );
-    } else if(dataProvider.id === undefined){
-      alert(
-        `Please select a Provider`
-      )
+      // on alerte si on a pas séléctionner de provider
+    } else if (dataProvider.id === undefined) {
+      alert(`Please select a Provider`);
+    }
 
-    }{
-      try {
-        const { data } = await axios.post("https://fungest-test.lahode.ch/api/costs", {
+    let testDataCosts = null;
+    let testDataImageUpload = null;
+
+    // si toutes les conditions sont rempli on poste le nouveau cost
+    try {
+      testDataCosts = await axios.post(
+        "https://fungest-test.lahode.ch/api/costs",
+        {
           date: values.date,
           currency: currency.name,
           description: values.description,
@@ -308,34 +322,69 @@ function Form() {
           total: values.total,
           archived: false,
           ticket: true,
-          breakdowns: breakdowns
-        });
-        console.log("POST SUCESS", data);
-        const id = data.data.id;
-
-      //   // const { dataUpload } = await axios.post(`https://fungest-test.lahode.ch/api/costs/${id}/upload`, {image
-      //   // })
-      //   axios({
-      //     method: "post",
-      //     url: `https://fungest-test.lahode.ch/api/costs/${id}/upload`,
-      //     data: bodyFormData,
-      //     headers: { "Content-Type": "multipart/form-data", "Accept":"application/json" },
-      //   })
-      //     .then(function (response) {
-      //       //handle success
-      //       console.log(`succes from post upload`,response);
-      //     })
-      //     .catch(function (response) {
-      //       //handle error
-      //       console.log(`error from post upload`,response);
-      //     });
-      // console.log("id", id);
-      alert("Ticket has been created succesfully");
-      } catch (err) {
-        console.log(err.message);
-
-      }
+          breakdowns: breakdowns,
+        }
+      );
+    } catch (e) {
+      console.error(
+        "[API][Post][costs] an error has occurred when posting costs",
+        e
+      );
     }
+    console.log("POST SUCESS", testDataCosts);
+    const id = testDataCosts.data.data.id;
+    console.debug("[ID]", testDataCosts.data.data.id, id);
+
+    let bodyFormData = new FormData();
+
+    bodyFormData.append("upload", {uri: imageInfoToSend.uri, name:'test.jpeg', type: 'image/jpeg'});
+
+    var config = {
+      method: 'post',
+      url: `https://fungest-test.lahode.ch/api/costs/${id}/upload`,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Accept": "application/json",
+      },
+      data : bodyFormData
+    };
+
+    // et on poste la photo que l'on va lui attribué
+    try {
+      testDataImageUpload = await axios(config);
+    } catch (e) {
+      console.error(
+        "[API][Upload][image] an error has occurred when posting an image",
+        e.response
+      );
+      console.error(
+        "[API][Upload][image] an error has occurred when posting an image",
+        e.message
+      );
+      console.error(
+        "[API][Upload][image] an error has occurred when posting an image",
+        e.request
+      );
+    }
+
+    console.log("imageResponse", testDataImageUpload);
+
+    // axios({
+    //   method: "post",
+    //   url: `https://fungest-test.lahode.ch/api/costs/${id}/upload`,
+    //   data: bodyFormData,
+    //   headers: { "Content-Type": "multipart/form-data", "Accept":"application/json" },
+    // })
+    //   .then(function (response) {
+    //     //handle success
+    //     console.log(`succes from post upload`,response);
+    //   })
+    //   .catch(function (response) {
+    //     //handle error
+    //     console.log(`error from post upload`,response);
+    //   });
+    console.log("id", id);
+    alert("Ticket has been created succesfully");
   };
 
   return (
@@ -344,13 +393,11 @@ function Form() {
       <MyModal source={image} />
       <Text style={styles.textStyle}>Selected Currency: {currency.value}</Text>
       <View>
-     
-
         <CustomDropdown
-          label={currency.name? currency.name : "Change Currency"}
+          label={currency.name ? currency.name : "Change Currency"}
           data={dataCurrencyList}
           onSelect={setCurrency}
-          propHeight = {0}
+          propHeight={0}
         />
       </View>
       {currency.name === "CHF" ? (
@@ -377,18 +424,17 @@ function Form() {
         name="description"
         multiline={true}
       />
-   
-      <View style={styles.containerProvider} >
-      <Text style={styles.textStyle}>Provider: </Text>
-      <AddProviderModal />
 
+      <View style={styles.containerProvider}>
+        <Text style={styles.textStyle}>Provider: </Text>
+        <AddProviderModal />
       </View>
 
       <CustomDropdown
-        label={dataProvider.name === "" ? "Provider": dataProvider.name}
+        label={dataProvider.name === "" ? "Provider" : dataProvider.name}
         data={dataProvidersList}
         onSelect={setDataProvider}
-        propHeight = {300}
+        propHeight={300}
       />
       <Text style={styles.textStyle}>Total:</Text>
       <TextInput
@@ -402,8 +448,6 @@ function Form() {
         total={values.total}
         accountFromProvider={dataProvider.account_id}
       />
-
-      
 
       <Button
         elevation={10}
@@ -463,8 +507,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    
-  }
+  },
 });
 
 export default Form;

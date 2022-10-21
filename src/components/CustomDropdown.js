@@ -16,23 +16,35 @@ import { Entypo } from "@expo/vector-icons";
 
 
 const CustomDropdown = ({ label, data, onSelect, propHeight }) => {
-  
+  //propHeight = définit la hauteur du dropdown par rapport au label
+
+  // useRef utilisé pour atteindre un élément du dom
   const DropdownButton = useRef();
+
+  //boolean qui definira si on ferme le dropdown ou si on l'affiche
   const [visible, setVisible] = useState(false);
+
   const [selected, setSelected] = useState(undefined);
+
+  // valeur qui positionera le dropdown
   const [dropdownTop, setDropdownTop] = useState(0);
 
   // correspond à la valeur que l'utilsateur tappe dans la bar de recherche
   const [search, setSearch] = useState("");
 
+  //met à jour la recherche à chaque fois que la valeur de l'input est changée
   const updateSearch = (search) => {
     setSearch(search);
   };
 
+  // vérification du sate  visible
+  // si visible on lance openDropdown
   const toggleDropdown = () => {
     visible ? setVisible(false) : openDropdown();
   };
 
+  // les mesures du dropdown qui s affichera
+  // on change le sate de visible à true
   const openDropdown = ()=> {
     DropdownButton.current.measure((_fx, _fy, _w, h, _px, py) => {
       setDropdownTop(py - propHeight );
@@ -40,12 +52,14 @@ const CustomDropdown = ({ label, data, onSelect, propHeight }) => {
     setVisible(true);
   };
 
+  //quand on clique sur un item dans le dropdown
   const onItemPress = (item) => {
     setSelected(item);
     onSelect(item);
     setVisible(false);
   };
 
+  // rendu de chaque item qui proviennent de data
   const renderItem = ({ item }) => {
   //si search existe pas on retourne la liste entière
   // si search existe on retourne uniquement les items qui ont items.name qui commencent par search avec .startsWith(search)
@@ -72,6 +86,7 @@ const CustomDropdown = ({ label, data, onSelect, propHeight }) => {
   ;
 
   const renderDropdown = () => {
+    // affiche le dropdown et parcours les éléments passé dans data pour les afficher
     return (
       <Modal visible={visible} transparent animationType="none">
       
